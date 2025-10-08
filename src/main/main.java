@@ -23,58 +23,75 @@ public class main {
 
             switch (choice) {
             case 1:
-                System.out.print("Enter Username: ");
-                String username = sc.nextLine();
-                System.out.print("Enter Password: ");
-                String password = sc.nextLine();
-                
+                boolean loggedIn = false; // track if login succeeds
 
-                try {
-                    
+                while (!loggedIn) {
+                    System.out.print("Enter Username: ");
+                    String username = sc.nextLine();
+                    System.out.print("Enter Password: ");
+                    String password = sc.nextLine();
 
-                    
-                        PreparedStatement state = connectDB().prepareStatement("SELECT u_status, u_role, u_password FROM tbl_user WHERE u_name = '"+username+"' AND u_password = '"+password+"'");
-                       
-                        if(checkLogin(username, password)) {
-                            try (ResultSet rs = state.executeQuery()) {
-                                if(rs.next()) {
-                                    role = rs.getString("u_role");
-                                    status = rs.getString("u_status");   
-                                }
-                                rs.close();
-                                
-                                if (status.equalsIgnoreCase("Approved")) {
-                                    System.out.println(" Login successful! Welcome, " + username);
+                    try (Connection conn = connectDB()) {
+                        PreparedStatement state = conn.prepareStatement(
+                            "SELECT u_status, u_role, u_password FROM tbl_user WHERE u_name = ?"
+                        );
+                        state.setString(1, username);
 
-                                    if (role.equalsIgnoreCase("Official")) {
-                                        showAdminMenu(sc); // go to admin panel
+                        try (ResultSet rs = state.executeQuery()) {
+                            if (rs.next()) {
+                                String dbPassword = rs.getString("u_password");
+                                String status = rs.getString("u_status");
+                                String role = rs.getString("u_role");
+
+                                // check password match
+                                if (password.equals(dbPassword)) {
+                                    if (status.equalsIgnoreCase("Approved")) {
+                                        System.out.println("Login successful! Welcome, " + username);
+
+                                        if (role.equalsIgnoreCase("Official") || role.equalsIgnoreCase("Admin")) {
+                                            showAdminMenu(sc); // go to admin panel
+                                        } else {
+                                            System.out.println("You are logged in as a normal user.");
+                                        }
+                                        loggedIn = true; // exit loop
+                                    } else if (status.equalsIgnoreCase("Pending")) {
+                                        System.out.println("Your account is still pending approval.");
+                                        loggedIn = true; // exit loop
                                     } else {
-                                        System.out.println("You are logged in as a normal user.");
+                                        System.out.println("Your account is denied or inactive.");
+                                        loggedIn = true; // exit loop
                                     }
 
-                                } else if (status.equalsIgnoreCase("Pending")) {
-                                    System.out.println("PENDING");
+                                } else {
+                                    System.out.println("Incorrect password! Please try again...");
                                 }
-                                else {
-                                    System.out.println("Your account is still pending approval.");
-                                }
+                            } else {
+                                System.out.println("Username not found! Please try again...");
                             }
-                            
                         }
-                } catch (SQLException e) {
-                    System.out.println("Error: " + e.getMessage());
+
+                    } catch (SQLException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
+
+                    if (!loggedIn) {
+                        System.out.println(); // extra line for readability
+                    }
                 }
                 break;
+
 
             case 2:
                 System.out.print("Enter Username: ");
                 String newUser = sc.nextLine();
                 System.out.print("Enter Password: ");
                 String newType = sc.nextLine();
+                System.out.print("Enter Contact Number: ");
+                String newContact = sc.nextLine();
 
                 
-                db.updateRecord("INSERT INTO tbl_user (u_name, u_password, u_status) VALUES (?, ?, 'Pending')",
-                        newUser, newType);
+                db.updateRecord("INSERT INTO tbl_user (u_name, u_password, u_status, u_contact) VALUES (?, ?, 'Pending', ?)",
+                        newUser, newType, newContact);
 
                 System.out.println("Registration successful! Please wait for barangay official's approval.");
                 break;
