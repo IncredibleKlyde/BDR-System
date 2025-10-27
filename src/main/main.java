@@ -7,6 +7,7 @@ public class main {
 
     static config db = new config();
     static String role, status, dbPassword, fullName;
+    static int userId;
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -42,9 +43,14 @@ public class main {
                                     role = rs.getString("u_role");
                                     status = rs.getString("u_status");
                                     fullName = rs.getString("u_fullname");
-                                    int userId = rs.getInt("u_id");
-
-                                    if (password.equals(dbPassword)) {
+                                    userId = rs.getInt("u_id");
+                                }
+                                // ResultSet closer to prevent database locking
+                                rs.close();
+                                
+                                
+                                // DO NOT PUT THIS IF STATEMENT INSIDE THE if(rs.next()) CONDITIONAL STATEMENT BECAUSE IT'LL LOCK THE DATABASE
+                                if (password.equals(dbPassword)) {
                                         if (status.equalsIgnoreCase("Approved")) {
                                             System.out.println("Login successful! Welcome, " + fullName);
 
@@ -64,9 +70,6 @@ public class main {
                                     } else {
                                         System.out.println("Incorrect password! Please try again...");
                                     }
-                                } else {
-                                    System.out.println("Username not found! Please try again...");
-                                }
                             }
                         } catch (SQLException e) {
                             System.out.println("Error: " + e.getMessage());
