@@ -50,11 +50,20 @@ public class main {
                                 }
                                 // ResultSet closer to prevent database locking
                                 rs.close();
+<<<<<<< HEAD
 
                                 // DO NOT PUT THIS IF STATEMENT INSIDE THE if(rs.next()) CONDITIONAL STATEMENT BECAUSE IT'LL LOCK THE DATABASE
                                 if (password.equals(dbPassword)) {
                                     if (status.equalsIgnoreCase("Approved")) {
                                         System.out.println("Login successful! Welcome, " + fullName);
+=======
+                                
+                                
+                                // DO NOT PUT THIS IF STATEMENT INSIDE THE if(rs.next()) CONDITIONAL STATEMENT BECAUSE IT'LL LOCK THE DATABASE
+                                if (password.equals(dbPassword)) {
+                                        if (status.equalsIgnoreCase("Approved")) {
+                                            System.out.println("Login successful! Welcome, " + fullName);
+>>>>>>> 99dca8135d94619ce8e18e5b9cce9664e906fcd0
 
                                         if (role.equalsIgnoreCase("Official") || role.equalsIgnoreCase("Admin")) {
                                             //officials Officials =new Officials();
@@ -71,9 +80,12 @@ public class main {
                                         System.out.println("Your account has been disabled.");
                                         loggedIn = true;
                                     }
+<<<<<<< HEAD
                                 } else {
                                     System.out.println("Incorrect password! Please try again...");
                                 }
+=======
+>>>>>>> 99dca8135d94619ce8e18e5b9cce9664e906fcd0
                             }
                         } catch (SQLException e) {
                             System.out.println("Error: " + e.getMessage());
